@@ -70,7 +70,7 @@ The fastq files for this workshop have been uploaded to google drive folder
 
 https://drive.google.com/drive/u/0/folders/1RhrmfW3vMhPwAiBGdFIKfINWMsdvIG6E
 
-Download all the files in this directory to your laptop
+Download all the files ending in `fastq.gz` and `fasta.gz` in this directory to your laptop
 
 You can import the data by:
 
@@ -79,13 +79,15 @@ You can import the data by:
 2.  **Choose local file** and browse to the directory containing the files from the google drive and select all the file. Click **Open** to close the file browser. The names of the files should now appear in Galaxy.
 3.  Click **Start** to begin the upload
 
-3.  You should now have these 4 files in your history:
+3.  You should now have these 5 files in your history:
 
-- `231336_cancer_genes_r1.fastq.gz`
-- `231336_cancer_genes_r2.fastq.gz`
 - `231335_cancer_genes_r1.fastq.gz`
 - `231335_cancer_genes_r2.fastq.gz`
-- `cancer_genes_chr.bed`
+- `231336_cancer_genes_r1.fastq.gz`
+- `231336_cancer_genes_r2.fastq.gz`
+- `hg19.chr5_12_17.fasta.gz`
+
+where the first two files represent the forward and reverse reads sequence data from a patient’s normal tissue, and the next two represent the data of the same patient’s tumor tissue. The final file is a cut-down reference genome for chromosomes 5, 12 and 17 only.
 
 
 # Section 2: Fastq file format
@@ -96,19 +98,19 @@ You can view the files you just uploaded by clicking the **eye icon** the histor
 **231336_cancer_genes_r1.fastq**
 
 ```
-@HWI-D00461:188:HVGY2BCXY:1:1101:1363:84148/1
-TGTGTCATTTCTATTATCTTTGGAACAACCATGAATTAGTCCCTTGGGGTTTTCAAATGCTGCACACTGACTCACACATTTATTTGGTTCTGTTTTTGCCTTCCCTNN
+@ST-K00265:137:HT33CBBXX:3:1213:9952:2738/1
+CGGACCCCCGACATGTCTGCTGTTGCCGCCGCGCAGTCCCGCCAGTCCCTGCGCAGACTGCGCCTGCGCACCACACCGGGGTCGAGCTGGCGGGGGAGGGG
 +
-DDDDDIHIIIIIHIIIIIIIIIIHIIIIIIIIIHIIIIIIHHIIIIIIIHIIIHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIHHIDHHIHC#
+-AF-A<AAA7AA-AF<F7AJAJF<AJF777FAJJFJJ7-A-7-FJAAA-AFJJ<7F7F<FJ7-A-FJA<J7J77<<FJ<JJ<<JAFJ<7FJJJJ-J-A<7A
 ```
 
 **231336_cancer_genes_r2.fastq**
 
 ```
-@HWI-D00461:188:HVGY2BCXY:1:1101:1363:84148/2
-TGGAAAGACTTTTGGGGGGGGGAGTATTTTTCTTGTTTCTGGTTTTGGTTTTTTTGATCCGGGAAAGATTTTGTTTTTTGGAGGTTGGACTTTTGGGGAGGGGAAAAN
+@ST-K00265:137:HT33CBBXX:3:1107:2047:6378/1
+CCAGCTCGACCCCGGTGTGGTGCGCAGGCGCAGTCTGCGCAGGGACTGGCGGGACTGCGCGGCGGCAACAGCAGACATGTCGGGGGTCCGGGGCCTGTCGC
 +
-<00<<1111<1<11/0/<///</<0111DF11<<11111<11111<1/1<1D1///<<11<<</<1111<<11<DD1<//<110<11/11<0<0</0<0<<-//<<FE
+AA<AAFJFAJ7A-A7--AFA<FJFJJ7FFJAJ7-7-7FJJJJFJ7FFJJ7FA<<F<7FJJAAJJA<JJJFFJJ<AJF<JJFJA-<7AJJA<-AF-JJJJJ-
 ```
 
 
@@ -139,20 +141,22 @@ First of all, we convert the base-calling probability (p) into a `Q` score using
 
 $$ p = 10^{-Q/10} $$
 
-Let's see this calculation for the first few bases of the first read in `231336_cancer_genes_r1.fastq`; `DDDDDIHI....`
+Let's see this calculation for the first few bases of the first read in `231336_cancer_genes_r1.fastq`; `-AF-A<AAA7....`
 
 Character  | Code | Minus 33 Offset | Probability
 ------------- | ------------- | ------------- | -------------
-D  | 68 | 35 | 0.0003162278
-D  | 68 | 35 | 0.0003162278
-D  | 68 | 35 | 0.0003162278
-D  | 68 | 35 | 0.0003162278
-D  | 68 | 35 | 0.0003162278
-I  | 73 | 40 | 0.0001000000
-H  | 72 | 39 | 0.0001258925
-I  | 73 | 40 | 0.0001000000
+-  | 45 | 12 | 0.0631
+A  | 65 | 32 | 0.0006
+F  | 70 | 37 | 0.0002
+-  | 45 | 12 | 0.0631
+A  | 65 | 32 | 0.0006
+<  | 60 | 27 | 0.0020
+A  | 65 | 32 | 0.0006
+A  | 65 | 32 | 0.0006
 
 In practice, we don't have to convert the values as we have software that will do this automatically
+
+
 
 -----
 
@@ -199,41 +203,33 @@ The `bam` file is a compressed, binary, version of a `sam` file.
     + Header gives information about the alignment and references sequences used
 
 
-The first part of the header lists the names (`SN`) of the sequences (chromosomes) used in alignment, their length (`LN`) and a *md5sum* "[digital fingerprint](https://en.wikipedia.org/wiki/Md5sum)" of the `.fasta` file used for alignment (`M5`).
+The first part of the header lists the names (`SN`) of the sequences (chromosomes) used in alignment, their length (`LN`) and somtimes a *md5sum* "[digital fingerprint](https://en.wikipedia.org/wiki/Md5sum)" of the `.fasta` file used for alignment (`M5`).
 
 ```
-
-@HD VN:1.0 SO:coordinate
-@SQ SN:chr10 LN:135534747
-@SQ SN:chr11 LN:135006516
-@SQ SN:chr11_gl000202_random LN:40103
+@HD VN:1.3 SO:coordinate
+@SQ SN:chr5 LN:180915260
 @SQ SN:chr12 LN:133851895
-@SQ SN:chr13 LN:115169878
-@SQ SN:chr14 LN:107349540
-@SQ SN:chr15 LN:102531392
-@SQ SN:chr16 LN:90354753
-.....
-.....
+@SQ SN:chr17 LN:81195210
+@RG ID:231335 SM:Normal PL:ILLUMINA
 
 ```
+
 
 
 We also have a section where we can record the processing steps used to derive the file
+
 ```
-@PG ID:bowtie2 PN:bowtie2 VN:2.3.4.1 CL:"/jetstream/scratch0/main/conda/envs/mulled-v1-65d5efe4f1b69ab7166d1a5a5616adebe902133ea3e4c189d87d7de2e21ddc17/bin/bowtie2-align-s --wrapper basic-0 -p 10 -x /cvmfs/data.galaxyproject.org/byhand/hg19/hg19full/bowtie2_index/hg19full -1 input_f.fastq -2 input_r.fastq"
-....
-....
+@PG ID:bwa PN:bwa VN:0.7.17-r1188 CL:bwa mem -t 8 -v 1 -R @RG\tID:231335\tSM:Normal\tPL:ILLUMINA localref.fa /data/dnb02/galaxy_db/files/009/352/dataset_9352452.dat /data/dnb02/galaxy_db/files/009/352/dataset_9352453.dat
 
 ```
 
 Next is a *tab-delimited* section that describes the alignment of each sequence in detail. 
 
 ```
-HWI-D00461:188:HVGY2BCXY:1:1109:3430:66266	163	13	32889826	42	108M	=	32889969	251	TTGGGACGAGCGCGTCTTCCGTAGTCCCAGTCCAGCGTGGCGGGGGAGCGCCTCACGCCCCGGGTCGCTGCCGCGGCTTCTTGCCCTTTTGTCTCTGCCAACCCCCAC	0D@@?GEHCHHCEHIDHH?1CCHCHI@1<CCCFC@GCCCEHIHCHICHC?HH=GHE1DE<CEHDEHHC<CCH/?HHG/<1<D@11D?G?FGHEHH01D00D;00<DH<	AS:i:-5 XN:i:0 XM:i:1 XO:i:0 XG:i:0 NM:i:1 MD:Z:21C86 YS:i:-5 YT:Z:CP
-
+ST-K00265:137:HT33CBBXX:3:2106:5944:11759	99	chr5	218378	60	101M	=	218465	188	GTATCCCCCCTCCCCCGCCAGCTCGACCCCGGTGTGGTGCGCAGGCGCAGTCTGCGCAGGGACTGGCGGGACTGCGCGGCGGCAACAGCAGACATGTCGGG	AAFFFJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	NM:i:0 MD:Z:101 MC:Z:101M AS:i:101 XS:i:50 RG:Z:231335
 ```
 
-![](media/sam-entry-explained.png)
+
 
 Column | Official Name | Brief
 ------ | -------------- | -----------
@@ -343,6 +339,12 @@ The tool will also report how many ***PCR Duplicates*** have been found in the d
 
 The output of this tool will tell you how many reads aligned to each chromosome in your reference genome.
 
+<div class="alert alert-warning">
+
+**Optional Exercise:** The multiqc tool that we introduced earlier is about to interpet the output of flagstat and idxstats. Create a report the combines the results of these metrics with the fastqc reports on the fastq files
+
+</div>
+
 
 ## Download your bam file
 
@@ -428,6 +430,21 @@ The main display of IGV should now update to hold tracks for the aligned reads f
 
 If you hover over a particular read, how will see columns from the bam file being displayed such as the mapping quality and information about the paired reads.
 
+
+<div class="alert alert-warning">
+
+**Discussion:** 
+
+- Navigate to region `chr17:41,244,228-41,245,700` in IGV. How many potential SNVs can you find inside the region? How many of these are likely to be *somatic*.
+
+- Navigate to position `chr17:41,219,513` in IGV. Hover over the coverage track and discover the percentage of reference bases in the Tumour and the Normal. Is there evidence for a somatic variant at this position? 
+
+- Navigate to position `chr17:41,234,304`. Hover over the coverage track and discover the percentage of reference bases in the Tumour and the Normal. Is there evidence for a somatic variant at this position? Right-click anywhere on the panel displaying the tumour reads and select *Colour alignments by* -> *Read strand*. Repeat for the normal reads. Does this change your interpretation of the variant?
+
+
+
+</div>
+
 # Section 6: Post-processing of reads and Variant Calling
 
 Now follow the sections
@@ -439,13 +456,16 @@ Now follow the sections
 
 # Section 7: Annotation
 
+## About vcf format
+
+
 In the previous section, you will have produced a *vcf* file. The `.vcf` format was initially developed by the [1000 Genomes Project](http://www.1000genomes.org/wiki/Analysis/vcf4.0), and ownership has been subsequently transferred to [Global Alliance for Genomics and Health Data Working group file format team](http://ga4gh.org/#/fileformats-team). The format can be used to represent information about all kinds of genomic variation. In this session we will just consider SNVs.
 
 We don’t require any specialised software to look at the contents of a vcf file. They can be opened in a bog-standard text editor, however your laptop may try and interpret the file as containing contact information (virtual contact file).
 
 In a similar vein to the `.bam` and `.sam` files we saw earlier, the `.vcf` files contains many lines of header information.
 
-**illustrative example, not derived from the dataset in the workshop**
+**Illustrative example, not derived from the dataset in the workshop**
 
 ```
 ##fileformat=VCFv4.2
@@ -532,4 +552,44 @@ GL 	  -13.9693,0,-19.1141 	Genotype Likelihood, log10-scaled likelihoods of the 
 ```
 
 So for this particular variant, in the sample `NA12878` there is a genotype of `0\1` (heterozygous) and a depth of `11` etc.
+
+
+<div class="alert alert-warning">
+
+**Discussion:** Locate the lines in the vcf file that relate to some of the positions that we looked at previously in IGV
+
+- `chr17:41244936`
+- `chr17:41219513`
+- `chr17:41234304`
+
+What kind of variants (Germline, Somatic) have been called at these positions? Do they pass filters used by `varscan`?
+
+You can also load the vcf into IGV, which will display details of each variant call above the aligned reads.
+</div>
+
+![](media/reads-with-vcf.png)
+
+
+## Annotating with SNPeff
+
+As we have seen the standard vcf file contains genome coordinates for each variant, but gives no useful information about what gene (if any) the variant lies within or the potential impact of the variant. One such tool for adding genomic information is SNPeff which is described in the Galaxy tutorial.
+
+- [See here](https://training.galaxyproject.org/training-material/topics/variant-analysis/tutorials/somatic-variants/tutorial.html#adding-annotations-to-the-called-variants); **"Adding functional genomic annotations" only**
+
+SNPeff will produce a modified `vcf` file and a HTML report. 
+
+<div class="alert alert-warning">
+
+**Discussion:** Scroll through the contents of the vcf file produced by snpeff. What extra information has it added? Try and locate the variants within `BRCA1`. Also take some time to digest the contents of the HTML report and the information it provides
+
+</div>
+
+
+## Extracting somatic calls from the vcf
+
+- Select the VCFfilter tool under the `VCF/BCF` section
+- In *Specify filterting value* type the text `SS = 2` (*make sure you enter this exactly. spaces seem to be important*)
+
+
+## Annotation with Ensembl VEP
 
