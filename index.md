@@ -565,9 +565,10 @@ So for this particular variant, in the sample `NA12878` there is a genotype of `
 What kind of variants (Germline, Somatic) have been called at these positions? Do they pass filters used by `varscan`?
 
 You can also load the vcf into IGV, which will display details of each variant call above the aligned reads.
+![](media/reads-with-vcf.png)
+
 </div>
 
-![](media/reads-with-vcf.png)
 
 
 ## Annotating with SNPeff
