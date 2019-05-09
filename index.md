@@ -9,7 +9,7 @@ output:
     df_print: paged
     toc: yes
 editor_options:
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 
@@ -498,7 +498,7 @@ The first seven columns should look consistent across different genotype callers
 
 The contents of the INFO and FORMAT columns will depend on what variant caller has been used. The INFO column contains metrics and other information related to each variant call as a set of KEY=VALUE pairs. Each pair is separated by a ; character.
 
-The INFO for the a variant call may reads as:-
+The INFO for the a variant call may read as:-
 
 ```
 DP=27;SS=1;SSC=0;GPV=5.1363e-16;SPV=1

@@ -35,6 +35,9 @@ All but one of the following set of candidate somatic SNVs were called by CaVEMa
 
 Click on the `IGV` link for each variant in turn to navigate to that genomic location in the IGV browser. Review the read alignments supporting the variant and those in the region surrounding the variant to decide on your confidence in the call. Click on the `Vote` link to register your decision anonymously.
 
+We will review the results in class to see if there is agreement in the calls!
+
+
 ### Candidate SNVs
 
 <div style="line-height: 50%;"><br></div>
