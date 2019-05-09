@@ -44,7 +44,8 @@ We will use training materials provided by the Galaxy Project and sign-post to r
 ## Background
 
 #### Where do the data in this tutorial come from?
-The data for this tutorial are down-sampled to genes that are present in the COSMIC dataset We will use these data throughout the course to call variants, filter and discuss the clinical impact of any mutations. 
+
+The data for this tutorial are from a cancer patient down-sampled to genes that are present in the COSMIC dataset. We will use these data throughout the course to call variants, filter and discuss the clinical impact of any mutations. 
 
 # Preparation and Data Upload
 
@@ -52,7 +53,7 @@ If attending this workshop in-person you should have access to a private queue o
 
 Follow this link to register an account:- 
 
-
+https://usegalaxy.eu/join-training/sbc-somatic-2019-05-10
 
 Otherwise, register as a new user on one of the public Galaxy servers
 
@@ -68,7 +69,7 @@ We can going to import the [*fastq* files](https://en.wikipedia.org/wiki/FASTQ_f
 
 The fastq files for this workshop have been uploaded to google drive folder
 
-https://drive.google.com/drive/u/0/folders/1RhrmfW3vMhPwAiBGdFIKfINWMsdvIG6E
+- [Click here to access the google folder](https://drive.google.com/drive/folders/1-S8d92NmcQ7RfVjtP-FEtCizZnj_GTvX?usp=sharing)
 
 Download all the files ending in `fastq.gz` and `fasta.gz` in this directory to your laptop
 
@@ -95,7 +96,7 @@ where the first two files represent the forward and reverse reads sequence data 
 You can view the files you just uploaded by clicking the **eye icon** the history item. The first few lines should read as follows
 
 
-**231336_cancer_genes_r1.fastq**
+**231336_cancer_genes_r1.fastq.gz**
 
 ```
 @ST-K00265:137:HT33CBBXX:3:1213:9952:2738/1
@@ -104,7 +105,7 @@ CGGACCCCCGACATGTCTGCTGTTGCCGCCGCGCAGTCCCGCCAGTCCCTGCGCAGACTGCGCCTGCGCACCACACCGGG
 -AF-A<AAA7AA-AF<F7AJAJF<AJF777FAJJFJJ7-A-7-FJAAA-AFJJ<7F7F<FJ7-A-FJA<J7J77<<FJ<JJ<<JAFJ<7FJJJJ-J-A<7A
 ```
 
-**231336_cancer_genes_r2.fastq**
+**231336_cancer_genes_r2.fastq.gz**
 
 ```
 @ST-K00265:137:HT33CBBXX:3:1107:2047:6378/1
@@ -116,7 +117,7 @@ AA<AAFJFAJ7A-A7--AFA<FJFJJ7FFJAJ7-7-7FJJJJFJ7FFJJ7FA<<F<7FJJAAJJA<JJJFFJJ<AJF<JJ
 
 The first line is the unique identifier for each sequenced read. It can be used to encode information such as the *sequencing machine*, *flow cell* and *lane* that the read was generated from and the physical coordinates on the lane.  
 
-The quality scores are [ASCII](http://ascii-code.com/) representations of how confident we are that a particular base has been called correctly. Letters that are further along the alphabet indicate higher confidence. This is important when trying to identify types of genome variation such as single base changes, but is also indicative of the overall quality of the sequencing. Different scales have been employed over time (resulting in a different set of characters appearing in the file). We will need to tell Galaxy which scale has been used in order that we can process the data correctly; hence why we explictly stated the files were of type **fastqsanger** when we uploaded them. 
+The quality scores are [ASCII](http://ascii-code.com/) representations of how confident we are that a particular base has been called correctly. Letters that are further along the alphabet indicate higher confidence. This is important when trying to identify types of genome variation such as single base changes, but is also indicative of the overall quality of the sequencing. Different scales have been employed over time (resulting in a different set of characters appearing in the file). . 
 
 
 ### Deriving the Quality Score
@@ -354,6 +355,10 @@ For the next setp you will need to download the `bam` file. To do this, you can 
 
 **Make sure that you click both Download dataset and Download bam_index**
 
+**If you have problems creating the bam file, a pre-prepared file is available from the google drive**
+
+https://drive.google.com/drive/folders/1-S8d92NmcQ7RfVjtP-FEtCizZnj_GTvX?usp=sharing
+
 # Section 5. Visualising the aligned reads with IGV
 
 Whilst Bioinformatics tools are very powerful and allow you to perform statistical analyses and test hypotheses, there is no substitute for **looking at and exploring the data**. A trained-eye can quite quickly get a sense of the data quality before any computational analyses have been run. Futhermore, as the person requesting the sequencing, you probably know a lot about the biological context of the samples and what to expect.
@@ -388,7 +393,7 @@ By default, IGV should load with Human genome version *hg19* already loaded. It 
 
 ![](media/select_genome.PNG)
 
-We can also load extra *tracks* into the browser that can help us understand our variant calls. We can load data from *dbSNP* which will tell us about common mutations that already been identified. These can be loaded via *File* -> *Load from Server..* and selecting `dbSNP 1.4.7` from the `Variation and Repeats` section
+We can also load extra *tracks* into the browser that can help us understand our variant calls. For example, we can load data from *dbSNP* which will tell us about common mutations that already been identified. These can be loaded via *File* -> *Load from Server..* and selecting `dbSNP 1.4.7` from the `Variation and Repeats` section
 
 ![](media/available_datasets.PNG)
 
@@ -439,10 +444,6 @@ If you hover over a particular read, how will see columns from the bam file bein
 
 - Navigate to position `chr17:41,219,513` in IGV. Hover over the coverage track and discover the percentage of reference bases in the Tumour and the Normal. Is there evidence for a somatic variant at this position? 
 
-- Navigate to position `chr17:41,234,304`. Hover over the coverage track and discover the percentage of reference bases in the Tumour and the Normal. Is there evidence for a somatic variant at this position? Right-click anywhere on the panel displaying the tumour reads and select *Colour alignments by* -> *Read strand*. Repeat for the normal reads. Does this change your interpretation of the variant?
-
-
-
 </div>
 
 # Section 6: Post-processing of reads and Variant Calling
@@ -465,104 +466,87 @@ We don’t require any specialised software to look at the contents of a vcf fil
 
 In a similar vein to the `.bam` and `.sam` files we saw earlier, the `.vcf` files contains many lines of header information.
 
-**Illustrative example, not derived from the dataset in the workshop**
 
 ```
 ##fileformat=VCFv4.2
-##fileDate=20170721
-##source=freeBayes v1.1.0-44-gd784cf8
-##reference=/reference_data/Homo_sapiens_assembly19.fasta
-##contig=<ID=1,length=249250621>
-##contig=<ID=2,length=243199373>
-##contig=<ID=3,length=198022430>
-##contig=<ID=4,length=191154276>
-##contig=<ID=5,length=180915260>
-##contig=<ID=6,length=171115067>
+##FILTER=<ID=PASS,Description="All filters passed">
+##reference=ref.fa
+##contig=<ID=chr5,length=180915260>
+##contig=<ID=chr12,length=133851895>
+##contig=<ID=chr17,length=81195210>
+##FILTER=<ID=VarCount,Description="Fewer than 4 variant-supporting reads">
+##FILTER=<ID=VarFreq,Description="Variant allele frequency below 0.05">
+##FILTER=<ID=VarAvgRL,Description="Average clipped length of variant-supporting reads < 90">
+......
+......
+
 ```
 
 After many more lines of information, we finally get to the details of the actual calls themsevles. This part of the file is tab-delimited; with 10 columns for every call. The vcf specification page gives details of what should be contained in each column
 
-```
-    CHROM
-    POS
-    ID
-    REF
-    ALT
-    QUAL
-    FILTER
-    INFO
-    FORMAT
-    NA12878
-```
 
-Shown here is the information about five calls
+Shown here is the information about three calls
 
 ```
-#CHROM  POS ID  REF ALT QUAL    FILTER  INFO    FORMAT  NA12878
-20  504789  .   C   T   155.466 .   AB=0;ABP=0;AC=2;AF=1;AN=2;AO=5;CIGAR=1X;DP=5;DPB=5;DPRA=0;EPP=3.44459;EPPR=0;GTI=0;LEN=1;MEANALT=1;MQM=60;MQMR=0;NS=1;NUMALT=1;ODDS=11.5366;PAIRED=1;PAIREDR=0;PAO=0;PQA=0;PQR=0;PRO=0;QA=189;QR=0;RO=0;RPL=4;RPP=6.91895;RPPR=0;RPR=1;RUN=1;SAF=3;SAP=3.44459;SAR=2;SRF=0;SRP=0;SRR=0;TYPE=snp;technology.ILLUMINA=1   GT:DP:AD:RO:QR:AO:QA:GL 1/1:5:0,5:0:0:5:189:-17.363,-1.50515,0
-20  505298  .   T   C   48.5303 .   AB=0;ABP=0;AC=2;AF=1;AN=2;AO=2;CIGAR=1X;DP=2;DPB=2;DPRA=0;EPP=3.0103;EPPR=0;GTI=0;LEN=1;MEANALT=1;MQM=44.5;MQMR=0;NS=1;NUMALT=1;ODDS=7.37776;PAIRED=1;PAIREDR=0;PAO=0;PQA=0;PQR=0;PRO=0;QA=65;QR=0;RO=0;RPL=2;RPP=7.35324;RPPR=0;RPR=0;RUN=1;SAF=1;SAP=3.0103;SAR=1;SRF=0;SRP=0;SRR=0;TYPE=snp;technology.ILLUMINA=1    GT:DP:AD:RO:QR:AO:QA:GL 1/1:2:0,2:0:0:2:65:-6.05687,-0.60206,0
-20  506074  .   A   G   2.08497e-06 .   AB=0;ABP=0;AC=0;AF=0;AN=2;AO=2;CIGAR=1X;DP=7;DPB=7;DPRA=0;EPP=7.35324;EPPR=6.91895;GTI=0;LEN=1;MEANALT=1;MQM=44.5;MQMR=60;NS=1;NUMALT=1;ODDS=14.5493;PAIRED=1;PAIREDR=1;PAO=0;PQA=0;PQR=0;PRO=0;QA=4;QR=189;RO=5;RPL=2;RPP=7.35324;RPPR=6.91895;RPR=0;RUN=1;SAF=2;SAP=7.35324;SAR=0;SRF=0;SRP=13.8677;SRR=5;TYPE=snp;technology.ILLUMINA=1  GT:DP:AD:RO:QR:AO:QA:GL 0/0:7:5,2:5:189:2:4:0,-1.72751,-16.9877
-20  506882  .   A   G   1.15644 .   AB=0.333333;ABP=4.45795;AC=1;AF=0.5;AN=2;AO=2;CIGAR=1X;DP=6;DPB=6;DPRA=0;EPP=3.0103;EPPR=3.0103;GTI=0;LEN=1;MEANALT=1;MQM=60;MQMR=60;NS=1;NUMALT=1;ODDS=1.18712;PAIRED=1;PAIREDR=1;PAO=0;PQA=0;PQR=0;PRO=0;QA=54;QR=153;RO=4;RPL=2;RPP=7.35324;RPPR=5.18177;RPR=0;RUN=1;SAF=1;SAP=3.0103;SAR=1;SRF=3;SRP=5.18177;SRR=1;TYPE=snp;technology.ILLUMINA=1   GT:DP:AD:RO:QR:AO:QA:GL 0/1:6:4,2:4:153:2:54:-3.31865,0,-12.3328
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NORMAL	TUMOR
+chr5	225768	.	G	C	.	VarReadPos	DP=27;SS=1;SSC=0;GPV=5.1363e-16;SPV=1	GT:GQ:DP:AD:ADF:ADR	1/1:.:16:0,16:0,2:0,14	1/1:.:11:0,11:0,1:0,10
+chr5	230980	.	A	G	.	PASS	DP=157;SS=1;SSC=0;GPV=0;SPV=1	GT:GQ:DP:AD:ADF:ADR	1/1:.:88:0,88:0,51:0,37	1/1:.:69:0,69:0,45:0,24
+chr5	231111	.	T	C	.	PASS	DP=127;SS=1;SSC=0;GPV=0;SPV=1	GT:GQ:DP:AD:ADF:ADR	1/1:.:75:0,75:0,39:0,36	1/1:.:52:0,52:0,26:0,26
 ```
 
-The first seven columns should look consistent across different genotype callers. In this exercise we have not annotated against known variants, or applied any filtering, so the ID and FILTER columns are blank. In some .vcf files these columns might be populated with dbSNP IDs or flags such as PASS / FAIL respectively.
+The first seven columns should look consistent across different genotype callers.
 
 The contents of the INFO and FORMAT columns will depend on what variant caller has been used. The INFO column contains metrics and other information related to each variant call as a set of KEY=VALUE pairs. Each pair is separated by a ; character.
 
 The INFO for the a variant call may reads as:-
 
 ```
-AB=0.454545;ABP=3.20771;AC=1;AF=0.5;AN=2;AO=5;CIGAR=1X;DP=11;DPB=11;DPRA=0;EPP=3.44459;EPPR=4.45795;GTI=0;.......
+DP=27;SS=1;SSC=0;GPV=5.1363e-16;SPV=1
 ```
-which we can interpret as:-
+
 
 ```
- 	            Key 	Value
-AB=0.454545 	AB 	0.454545
-ABP=3.20771 	ABP 	3.20771
-AC=1 	        AC 	1
-AF=0.5 	      AF 	0.5
-AN=2 	        AN 	2
-AO=5 	        AO 	5
-CIGAR=1X 	    CIGAR 	1X
-DP=11 	      DP 	11
-DPB=11 	      DPB 	11
-DPRA=0 	      DPRA 	0
+      Key   Value
+DP=27 DP    27
+SS=1  SS    1
+SSC=0 SSC   0
+GPV=5.1.. GPV   5.1363e-16
+SPV=1 SPV   1
 
 ```
 
-The final column in the file describes the calls for the sample `NA12878`, which was the only sample that we called variants on. In the sample column (`NA12878`) for the first variant we see the entry
+The meaning of each key can be discovered by looking at the header for the file. e.g. `##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">`. So this variant has a total of 27 bases covering it. The `INFO` values are *variant-specific*,
+
+
+The final column in the file describes the calls for the NORMAL and TUMOUR samples. In the sample column (`NORMAL`) for the first variant we see the entry
 
 ```
-0/1:11:11,5:6:245:5:188:-13.9693,0,-19.1141
+1/1:.:16:0,16:0,2:0,14
 ```
 
-These are values separated by a `:` character and they are interpreted in the same order as dictated by the FORMAT column which is `GT:DP:DPR:RO:QR:AO:QA:GL`
+These are values separated by a `:` character and they are interpreted in the same order as dictated by the FORMAT column which is `GT:GQ:DP:AD:ADF:ADR`
 
 ```
-Key 	Value 	Description
-GT 	  0/1 	Genotype
-DP 	  11 	Read Depth
-DPR 	11,5 	Number of observation for each allele
-RO 	  6 	Reference allele observation count
-QR 	  245 	Sum of quality of the reference observations
-AO 	  5 	Alternate allele observation count
-QA 	  188 	Sum of quality of the alternate observations
-GL 	  -13.9693,0,-19.1141 	Genotype Likelihood, log10-scaled likelihoods of the data given the called genotype for each possible genotype generated from the reference and alternate alleles given the sample ploidy
+##FORMAT=<ID=GT,Number=1,Type=String,Description=Genotype>
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth for each allele">
+##FORMAT=<ID=ADF,Number=R,Type=Integer,Description="Read depth for each allele on the forward strand">
+##FORMAT=<ID=ADR,Number=R,Type=Integer,Description="Read depth for each allele on the reverse strand">
 ```
 
-So for this particular variant, in the sample `NA12878` there is a genotype of `0\1` (heterozygous) and a depth of `11` etc.
+So for this particular variant there is a genotype of `1\1` (Homozygous for the alternate allele) in the normal sample and a depth of `16` etc. The same genotype information is repeated for the tumour. From this we can infer whether the variant is likely to be somatic or not and gain insight into whether it is a true variant or a false positive (which we will discuss in detail later).
 
 
 <div class="alert alert-warning">
 
-**Discussion:** Locate the lines in the vcf file that relate to some of the positions that we looked at previously in IGV
+**Discussion:** Locate the lines in the vcf file that relate to some of the positions that we looked at previously in IGV. How many reads in total cover each position?
 
 - `chr17:41244936`
 - `chr17:41219513`
 - `chr17:41234304`
 
-What kind of variants (Germline, Somatic) have been called at these positions? Do they pass filters used by `varscan`?
+What kind of variants (Germline, Somatic) have been called at these positions? 
 
 You can also load the vcf into IGV, which will display details of each variant call above the aligned reads.
 </div>
@@ -585,11 +569,12 @@ SNPeff will produce a modified `vcf` file and a HTML report.
 </div>
 
 
-## Extracting somatic calls from the vcf
-
-- Select the VCFfilter tool under the `VCF/BCF` section
-- In *Specify filterting value* type the text `SS = 2` (*make sure you enter this exactly. spaces seem to be important*)
-
 
 ## Annotation with Ensembl VEP
+
+A useful alternative to running SNPeff within Galaxy is the online VEP tool provided by Ensembl. This will annotate our variants with gene identifiers and also provide some predictions about the impact of the variant. 
+
+
+
+http://grch37.ensembl.org/Homo_sapiens/Tools/VEP
 
