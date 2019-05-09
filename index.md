@@ -578,3 +578,7 @@ A useful alternative to running SNPeff within Galaxy is the online VEP tool prov
 
 http://grch37.ensembl.org/Homo_sapiens/Tools/VEP
 
+
+## Assessment of Somatic calls
+
+[Click here](somatic_snv_assessment_exercise.html) to follow an exercise on inspecting and evaluating somatic calls
