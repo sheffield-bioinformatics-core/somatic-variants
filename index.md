@@ -440,19 +440,38 @@ If you hover over a particular read, how will see columns from the bam file bein
 
 **Discussion:** 
 
+Later on we will have some more examples of inspecting variants, but for now let's familiarise ourselves with IGV and what the data look like
+
 - Navigate to region `chr17:41,244,228-41,245,700` in IGV. How many potential SNVs can you find inside the region? How many of these are likely to be *somatic*.
 
 - Navigate to position `chr17:41,219,513` in IGV. Hover over the coverage track and discover the percentage of reference bases in the Tumour and the Normal. Is there evidence for a somatic variant at this position? 
+
 
 </div>
 
 # Section 6: Post-processing of reads and Variant Calling
 
-Now follow the sections
+Whilst we can inspect variants by eye, it would clearly be impossible to scrutinise each position in the genome to see if a variants exists there. We will employ a *variant calling* method to narrow-down our search for somatic variants, although as we will see, such calls still require some degree of filtering and curation. The particular tool we will use is [varscan2](http://dkoboldt.github.io/varscan/), mainly because it is available via Galaxy. For production-level analyses a tool such as [MuTect](https://software.broadinstitute.org/cancer/cga/mutect) could be considered. However, there are licensing issues which preclude MuTect from being available in Galaxy. 
 
-- [Mapped Reads postprocessing](https://training.galaxyproject.org/training-material/topics/variant-analysis/tutorials/somatic-variants/tutorial.html#mapped-reads-postprocessing) from the galaxy training page
+Before we can proceed to variant calling, there are a couple of post-processing tasks that should be performed; removing duplicates and indel re-alignment. 
 
-- [Variant calling and classification](https://training.galaxyproject.org/training-material/topics/variant-analysis/tutorials/somatic-variants/tutorial.html#variant-annotation-and-reporting)
+In brief, removing *duplicates* removes reads that have **exactly the same** start and end position. Such reads are *assumed* to be an artefact of the PCR process and give a false impression of the coverage at affected positions. *However, careful thinking is required in situations other than whole-genome sequencing and this should certainly never be applied for targeted sequencing*.
+
+![](media/pcr_dups.png)
+
+Indel re-alignment deals with an artefact that can occur when placing reads close to indels. Since each read is aligned separately, alignment tools may prefer to align a read with a reference mismatch rather than consider an indel within a read. However, taking all reads into consideration around a locus may reveal the presence of an indel and prevent SNVs being falsely identified.
+
+*Before realignment*
+
+![](media/indel_realign.png)
+
+*After realignment*
+
+![](media/indel_realign_after.png)
+
+(see this [video](https://www.youtube.com/watch?v=S-WkQ5n0LLQ) for an explanation)
+
+Now follow the steps in ["Mapped Reads postprocessing"](https://training.galaxyproject.org/training-material/topics/variant-analysis/tutorials/somatic-variants/tutorial.html#mapped-reads-postprocessing) from the galaxy training page, before proceeding to ["Variant calling and classification"](https://training.galaxyproject.org/training-material/topics/variant-analysis/tutorials/somatic-variants/tutorial.html#variant-annotation-and-reporting)
 
 
 # Section 7: Annotation
@@ -464,7 +483,7 @@ In the previous section, you will have produced a *vcf* file. The `.vcf` format 
 
 We don’t require any specialised software to look at the contents of a vcf file. They can be opened in a bog-standard text editor, however your laptop may try and interpret the file as containing contact information (virtual contact file).
 
-In a similar vein to the `.bam` and `.sam` files we saw earlier, the `.vcf` files contains many lines of header information.
+In a similar vein to the `.bam` and `.sam` files we saw earlier, the `.vcf` files contains many lines of header information. These describe the reference sequences and various filters that have been applied.
 
 
 ```
@@ -494,9 +513,7 @@ chr5	230980	.	A	G	.	PASS	DP=157;SS=1;SSC=0;GPV=0;SPV=1	GT:GQ:DP:AD:ADF:ADR	1/1:.
 chr5	231111	.	T	C	.	PASS	DP=127;SS=1;SSC=0;GPV=0;SPV=1	GT:GQ:DP:AD:ADF:ADR	1/1:.:75:0,75:0,39:0,36	1/1:.:52:0,52:0,26:0,26
 ```
 
-The first seven columns should look consistent across different genotype callers.
-
-The contents of the INFO and FORMAT columns will depend on what variant caller has been used. The INFO column contains metrics and other information related to each variant call as a set of KEY=VALUE pairs. Each pair is separated by a ; character.
+The first seven columns should look consistent across different genotype callers. The contents of the `INFO` and `FORMAT` columns will depend on what variant caller has been used. The `INFO` column contains metrics and other information related to each variant call as a set of `KEY=VALUE` pairs. Each pair is separated by a `;` character.
 
 The INFO for the a variant call may read as:-
 
@@ -504,6 +521,7 @@ The INFO for the a variant call may read as:-
 DP=27;SS=1;SSC=0;GPV=5.1363e-16;SPV=1
 ```
 
+or 
 
 ```
       Key   Value
@@ -515,16 +533,16 @@ SPV=1 SPV   1
 
 ```
 
-The meaning of each key can be discovered by looking at the header for the file. e.g. `##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">`. So this variant has a total of 27 bases covering it. The `INFO` values are *variant-specific*,
+The meaning of each key can be discovered by looking at the header for the file. e.g. `##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">`. So this variant has a total of 27 bases covering it. 
 
 
-The final column in the file describes the calls for the NORMAL and TUMOUR samples. In the sample column (`NORMAL`) for the first variant we see the entry
+The final two columns in the file describes the calls for the NORMAL and TUMOUR samples respectively. In the sample column (`NORMAL`) for the first variant we see the entry
 
 ```
 1/1:.:16:0,16:0,2:0,14
 ```
 
-These are values separated by a `:` character and they are interpreted in the same order as dictated by the FORMAT column which is `GT:GQ:DP:AD:ADF:ADR`
+These are values separated by a `:` character and they are interpreted in the same order as dictated by the FORMAT column; which is `GT:GQ:DP:AD:ADF:ADR`
 
 ```
 ##FORMAT=<ID=GT,Number=1,Type=String,Description=Genotype>
